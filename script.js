@@ -11,11 +11,7 @@ function multiply(firstNumber, secondNumber) {
 }
 
 function divide(firstNumber, secondNumber) {
-  if (secondNumber === 0) {
-    return "ERROR";
-  } else {
-    return firstNumber/secondNumber;
-  }
+  return firstNumber / secondNumber;
 }
 
 function isDigit(value) {
@@ -34,62 +30,121 @@ function operate(firstNumber, secondNumber, operator) {
   } else if (operator === "*") {
     return multiply(firstNumber, secondNumber);
   } else if (operator === "÷") {
+    if (secondNumber === 0) {
+      return "ERROR";
+      
+    }
     return divide(firstNumber, secondNumber);
   }
+}
+
+function handleClear() {
+  inputDisplay.textContent = "";
+  outputDisplay.textContent = "";
+  calculator.reset();
+}
+
+function handleDigit(value) {
+  if (calculator.operator === "") {
+    calculator.setFirstNumber(value);
+  } else {
+    calculator.setSecondNumber(value);
+  }
+  updateInputDisplay(value);
+}
+
+function setOperator(value) {
+  updateInputDisplay(value);
+  calculator.operator = value;
+}
+
+function replaceOperator(value) {
+  inputDisplay.textContent = inputDisplay.textContent.replace(
+    calculator.operator,
+    value
+  );
+  calculator.operator = value;
+}
+function handleOperator(value) {
+  if (calculator.secondNumber === "") {
+    if (calculator.operator === "") {
+      setOperator(value);
+    } else {
+      replaceOperator(value);
+    }
+  } else {
+    calculator.firstNumber = operate(
+      Number(calculator.firstNumber),
+      Number(calculator.secondNumber),
+      calculator.operator
+    );
+    if (calculator.firstNumber === "ERROR") {
+      inputDisplay.textContent = '';
+      calculator.reset();
+      outputDisplay.textContent = "ERROR";
+    }
+    inputDisplay.textContent = calculator.firstNumber + value;
+    calculator.operator = value;
+    calculator.secondNumber = "";
+  }
+}
+
+function updateInputDisplay(value) {
+  inputDisplay.textContent += value;
+}
+
+function updateOutputDisplay(value) {
+  outputDisplay.textContent = value;
 }
 
 let calculatorButtons = document.querySelector(".calculator-buttons");
 let inputDisplay = document.querySelector(".input-display");
 let outputDisplay = document.querySelector(".output-display");
 
-let firstNumber = "";
-let secondNumber = "";
-let operator = "";
-let result = "";
+let calculator = {
+  firstNumber: "",
+  secondNumber: "",
+  operator: "",
+  result: "",
+  reset() {
+    this.firstNumber = "";
+    this.secondNumber = "";
+    this.operator = "";
+    this.result = "";
+  },
+  setFirstNumber(value) {
+    this.firstNumber += value;
+  },
+  setSecondNumber(value) {
+    this.secondNumber += value;
+  },
+  setResult(value) {
+    this.result = value;
+  },
+  calculate() {
+    this.result = operate(
+      Number(this.firstNumber),
+      Number(this.secondNumber),
+      this.operator
+    );
+  },
+};
 
 calculatorButtons.addEventListener("click", (event) => {
-  if (event.target.tagName === "BUTTON") {
-    const value = event.target.textContent;
-    if (value === "CLEAR") {
-      inputDisplay.textContent = "";
-      outputDisplay.textContent = "";
-      firstNumber = "";
-      secondNumber = "";
-      operator = "";
-      result = "";
-    } else if (isDigit(value)) {
-      outputDisplay.textContent = '';
-      if(operator === '') {
-        inputDisplay.textContent += value;
-        firstNumber+= value;
-      } else {
-        inputDisplay.textContent += value;
-        secondNumber+= value;
-      }
-    } 
-    else if (isOperator(value)) {
-        if(secondNumber === '') {
-          if(operator === ''){
-            inputDisplay.textContent += value;
-            operator = value;
-          } else {
-            inputDisplay.textContent = inputDisplay.textContent.replace(operator, value);
-            operator = value;
-          }
-        } else {
-          firstNumber = operate(Number(firstNumber), Number(secondNumber), operator);
-          inputDisplay.textContent = firstNumber + value;
-          operator = value;
-          secondNumber = '';
-        }
-    }
-     else if (value === "=") {
-      result = operate(Number(firstNumber), Number(secondNumber), operator);
-      outputDisplay.textContent = result;
-      inputDisplay.textContent = "";
-      firstNumber = "";
-      secondNumber = "";
-      operator = "";
-    }
+  if (event.target.tagName !== "BUTTON") return;
+
+  const value = event.target.textContent;
+
+  if (value === "CLEAR") {
+    handleClear();
+  } else if (isDigit(value)) {
+    handleDigit(value);
+  } else if (isOperator(value)) {
+    handleOperator(value);
+  } else if (value === "=") {
+    calculator.calculate();
+    outputDisplay.textContent = calculator.result;
+    inputDisplay.textContent = "";
+    calculator.reset();
   }
 });

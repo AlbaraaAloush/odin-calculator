@@ -30,14 +30,15 @@
 
 .calculator-buttons {
     height: 80%;
-    padding: 25px;
+    padding-top: 25px;
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
 }
 
 button {
-    flex-basis: calc(25% - 20px);
+    flex-basis: calc(25% - 15px);
     border-radius: 10px;
     font-size: 40px;
+    min-width: 0;
 }
